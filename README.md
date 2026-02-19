@@ -121,24 +121,101 @@ This application is designed to be reviewed by CodeRabbit to validate its code r
 
 ## Testing Endpoints
 
+### Automated Test Suite
+
+Run the comprehensive test suite to trigger all vulnerability endpoints:
+
 ```bash
+npm test
+```
+
+This will execute `test-api.js` which:
+- Creates users without validation
+- Tests SQL injection vulnerabilities
+- Triggers blocking CPU operations
+- Exposes hardcoded credentials
+- Tests async error handling failures
+- Demonstrates sensitive data exposure in logs
+- Tests path traversal vulnerabilities
+
+### Manual cURL Tests
+
+```bash
+# API Documentation
+curl http://localhost:3000/
+
+# Health check
+curl http://localhost:3000/health
+
 # User creation without validation
 curl -X POST http://localhost:3000/api/user \
   -H "Content-Type: application/json" \
-  -d '{"userId":1,"email":"test@example.com","age":"invalid"}'
+  -d '{"userId":"user_123","email":"test@example.com","age":"invalid"}'
 
-# Blocking computation
-curl http://localhost:3000/api/compute
+# Get user
+curl http://localhost:3000/api/user/user_123
+
+# List all users
+curl http://localhost:3000/api/users?limit=10
+
+# Blocking computation (will freeze server briefly)
+curl http://localhost:3000/api/compute?iterations=100000000
+
+# Hash operation (blocking, slow)
+curl -X POST http://localhost:3000/api/hash \
+  -H "Content-Type: application/json" \
+  -d '{"password":"test","rounds":50000}'
 
 # File access without validation
-curl http://localhost:3000/api/file/../../etc/passwd
+curl http://localhost:3000/api/file/package.json
 
 # Search without validation (SQL injection)
 curl "http://localhost:3000/api/search?q=admin' OR '1'='1"
 
-# External API call without error handling
+# Database operation (exposes hardcoded credentials)
+curl -X POST http://localhost:3000/api/db-operation
+
+# Log event (with sensitive data)
+curl -X POST http://localhost:3000/api/log-event \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: sk_test_key" \
+  -d '{"userId":"user_123","action":"test","data":{"secret":"value"}}'
+
+# View logs (exposes all sensitive data including API keys)
+curl http://localhost:3000/api/logs?limit=5
+
+# External API without error handling
 curl "http://localhost:3000/api/external-data?url=https://example.com"
 ```
+
+## Project Structure
+
+```
+sample-application-nodejs/
+├── app.js                 # Main application with core vulnerabilities
+├── utils.js              # Utility functions with security issues
+├── test-api.js           # Automated test suite
+├── package.json          # Dependencies with vulnerable versions
+├── .env.example          # Environment variables template
+├── .gitignore            # Git ignore file
+├── README.md             # This file
+├── config/
+│   └── database.js       # Database config with hardcoded credentials
+├── middleware/
+│   └── authMiddleware.js # Authentication middleware issues
+└── routes/
+    └── userRoutes.js     # User routes with vulnerabilities
+```
+
+## Key Improvements for Testing
+
+The application now includes:
+- **Functional in-memory database** for storing created users
+- **Parameterized test endpoints** (iterations, rounds, limits) for flexible testing
+- **Request logging** to demonstrate sensitive data exposure
+- **API documentation root endpoint** at `http://localhost:3000/`
+- **Automated test suite** (`test-api.js`) that exercises all vulnerabilities
+- **Detailed endpoint handling** that allows realistic API interactions
 
 ## Disclaimer
 

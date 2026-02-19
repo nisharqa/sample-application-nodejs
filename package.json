@@ -5,7 +5,9 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "node app.js"
+    "dev": "node app.js",
+    "test": "node test-api.js",
+    "test:endpoints": "node test-api.js"
   },
   "keywords": [
     "nodejs",
