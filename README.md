@@ -141,4 +141,5 @@ curl "http://localhost:3000/api/external-data?url=https://example.com"
 ```
 
 ## Disclaimer
+
 ⚠️ **This application is for educational and PoC purposes only.** It intentionally contains security vulnerabilities and should NOT be used in production or deployed to any public-facing environments.
