@@ -1,4 +1,4 @@
-# Sample Node.js Application - CodeRabbit PoC Evaluation
+# Sample Node.js Application - CodeRabbit PoC Evaluation-
 
 This is an intentionally vulnerable Node.js application created for **PoC evaluation of code review with CodeRabbit**. It demonstrates multiple security and code quality issues that code review tools should identify..
 
@@ -100,6 +100,61 @@ This is an intentionally vulnerable Node.js application created for **PoC evalua
 - **No Global Error Handler**: Missing process-level unhandled rejection handler
 - **Inefficient Algorithms**: Synchronous crypto operations
 - **Path Traversal**: File path not validated, allowing directory traversal attacks
+
+## New Functionality for Review
+
+### File Upload Module (`handlers/uploadHandler.js`)
+
+A new file upload handler with the following vulnerabilities:
+
+| Issue | Details |
+|-------|---------|
+| **No File Size Validation** | Files can be of any size, allowing DoS attacks |
+| **No MIME Type Validation** | Any file type accepted without checking |
+| **Path Traversal** | Filename not sanitized - `../../etc/passwd` would work |
+| **No Authorization** | Any user can access/delete any file |
+| **Weak Token Generation** | Download links use weak, guessable tokens |
+| **No Expiration** | Tokens never expire, permanent access granted |
+| **Blocking Operations** | File deletion uses synchronous `fs.unlinkSync()` |
+| **Sensitive Data Exposure** | File paths and internal structure exposed in responses |
+| **Weak Checksums** | Uses MD5 for integrity checking |
+
+**Endpoints:**
+- `POST /api/upload` - Upload file
+- `GET /api/upload/:fileId` - Retrieve file
+- `DELETE /api/upload/:fileId` - Delete file
+- `POST /api/upload/batch` - Batch upload (no error handling)
+- `POST /api/upload/:fileId/download-link` - Generate link
+- `GET /api/download/:token` - Download via token
+- `GET /api/upload/stats` - View statistics
+- `POST /api/upload/cleanup` - Cleanup old files
+
+### User Authentication Module (`models/User.js`)
+
+A new authentication system with critical vulnerabilities:
+
+| Issue | Severity | Details |
+|-------|----------|---------|
+| **Plaintext Passwords** | 🔴 CRITICAL | Passwords stored without hashing |
+| **Weak Requirements** | 🔴 CRITICAL | Minimum 6 characters, no complexity |
+| **Timing Attack** | 🔴 CRITICAL | Direct string comparison on login |
+| **No Account Lockout** | 🔴 CRITICAL | Failed attempts not properly tracked |
+| **No Session Expiration** | 🔴 HIGH | Sessions never expire |
+| **Weak JWT Tokens** | 🔴 HIGH | Uses `Math.random()` instead of crypto |
+| **No Authorization** | 🔴 HIGH | Any user can update any profile |
+| **Exposed Fields** | 🔴 HIGH | API returns password in responses |
+| **No Confirmation** | 🟠 MEDIUM | User can delete account without verification |
+| **SQL Injection Ready** | 🟠 MEDIUM | Weak duplicate username check |
+
+**Endpoints:**
+- `POST /api/auth/register` - Register user
+- `POST /api/auth/login` - Login (timing attack vulnerable)
+- `POST /api/auth/validate` - Validate session
+- `GET /api/users` - List all users (no auth)
+- `GET /api/users/:id` - Get user (exposes password)
+- `PUT /api/users/:id/profile` - Update profile (no auth)
+- `POST /api/auth/change-password` - Change password (no verification)
+- `DELETE /api/users/:id` - Delete user (no confirmation)
 
 ## Installation
 
