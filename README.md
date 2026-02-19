@@ -1,4 +1,4 @@
-# Sample Node.js Application - CodeRabbit PoC Evaluation
+# Sample Node.js Application - CodeRabbit PoC Evaluation-
 
 This is an intentionally vulnerable Node.js application created for **PoC evaluation of code review with CodeRabbit**. It demonstrates multiple security and code quality issues that code review tools should identify..
 
