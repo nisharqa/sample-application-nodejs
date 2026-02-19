@@ -1,0 +1,26 @@
+{
+  "name": "sample-application-nodejs",
+  "version": "1.0.0",
+  "description": "Sample Node.js application for CodeRabbit PoC evaluation with intentional security issues",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
+  "keywords": [
+    "nodejs",
+    "code-review",
+    "security-issues",
+    "coderabbit"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "4.17.1",
+    "body-parser": "1.19.0",
+    "mongoose": "5.11.15",
+    "dotenv": "8.2.0",
+    "lodash": "4.17.20"
+  },
+  "devDependencies": {}
+}
