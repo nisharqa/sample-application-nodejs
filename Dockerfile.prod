@@ -1,0 +1,48 @@
+# Docker production deployment configuration with vulnerabilities
+
+# Dockerfile.prod - Production Build
+# Issue: This file demonstrates improper production setup
+
+FROM node:22.15.0-alpine as builder
+
+WORKDIR /app
+
+COPY package*.json ./
+
+# Issue: Installing all dependencies in builder stage
+# Should filter for production only
+RUN npm install
+
+COPY . .
+
+# Skip build step - not needed for Node.js app
+
+# Final stage
+FROM node:22.15.0-alpine
+
+WORKDIR /app
+
+# Issue: Running as root user
+# Should create and use non-root user
+# RUN addgroup -g 1001 -S nodejs
+# RUN adduser -S nodejs -u 1001
+# USER nodejs
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app . 
+
+# Issue: Port hardcoded
+EXPOSE 3000
+
+# Issue: No signal handling for graceful shutdown
+# Node process will be terminated immediately
+CMD ["node", "app.js"]
+
+# Issues in production Dockerfile:
+# - Still uses node:alpine (bloated for prod)
+# - Running as root
+# - No explicit environment variables
+# - No health check
+# - No signal handling
+# - Large image size not optimized
+# - No distroless base consideration

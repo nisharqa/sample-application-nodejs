@@ -7,7 +7,12 @@
     "start": "node app.js",
     "dev": "node app.js",
     "test": "node test-api.js",
-    "test:endpoints": "node test-api.js"
+    "test:endpoints": "node test-api.js",
+    "docker:build": "docker build -t vulnerable-nodejs-app:latest .",
+    "docker:run": "docker run -p 3000:3000 vulnerable-nodejs-app:latest",
+    "docker:compose:up": "docker-compose up -d",
+    "docker:compose:down": "docker-compose down",
+    "docker:compose:logs": "docker-compose logs -f app"
   },
   "keywords": [
     "nodejs",

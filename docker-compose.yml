@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # Issue: Application service configuration with vulnerabilities
+  app:
+    # Issue: Building from local Dockerfile without image scanning
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    # Issue: Port binding to all interfaces (0.0.0.0)
+    ports:
+      - "3000:3000"
+    
+    # Issue: No resource limits defined
+    # Should have: mem_limit, cpus, etc.
+    # No restart policy for production
+    # Should have: restart: unless-stopped
+    
+    # Issue: Hardcoded environment variables exposed
+    # Should use: env_file or environment from secrets
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_HOST=localhost
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - API_KEY=sk_live_key_12345
+      - JWT_SECRET=super_secret_jwt_key
+    
+    # Issue: Volumes expose host filesystem to container
+    # Not recommended for production
+    volumes:
+      - .:/app
+      - /app/node_modules
+    
+    # Issue: No health check defined
+    # Should have: healthcheck.test, interval, timeout, retries
+    
+    # Issue: Logging configuration not set
+    # Could lead to large log files
+    
+    # Issue: No cap_drop for security
+    # Running with default capabilities
+    
+    # Issue: Network mode not restricted
+    # Could access host services
+    
+    # Issue: No read-only filesystem
+    # Container can write anywhere
+
+  # Optional MongoDB service for database
+  # Issue: Running without authentication
+  mongo:
+    image: mongo:5.0
+    
+    # Issue: Admin credentials exposed in compose file
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: myapp
+    
+    # Issue: No volume for data persistence
+    # Data lost when container stops
+    # volumes:
+    #   - mongo_data:/data/db
+    
+    # Issue: Port exposed to host (0.0.0.0:27017)
+    ports:
+      - "27017:27017"
+    
+    # Issue: No resource limits
+    # Issue: No restart policy
+    
+  # Optional Redis service for caching
+  # Issue: Running without password
+  redis:
+    image: redis:7-alpine
+    
+    # Issue: No authentication required
+    # Issue: Port exposed to all interfaces
+    ports:
+      - "6379:6379"
+    
+    # Issue: No data persistence
+    # Issue: No resource limits
+    # Issue: No restart policy
+    # Issue: No health check
+
+# Issue: No volumes defined at root level for data persistence
+# volumes:
+#   mongo_data:
+#   redis_data:
+
+# Issue: No networks defined
+# Services use default network without isolation
+# Should define custom networks for security
+
+# Issues in docker-compose.yml:
+# - Credentials exposed in plain text
+# - No resource limits defined
+# - No restart policies
+# - No health checks
+# - No volume mounts for persistence
+# - Port bindings to all interfaces
+# - No security options (cap_drop, read_only, etc.)
+# - Logging configuration missing
+# - No custom networks for isolation
+# - Development configuration used as template
+# - No secrets management
+# - Services have no dependency ordering
+# - No image scanning/vulnerability checks
