@@ -170,6 +170,112 @@ npm start
 
 The server will start on port 3000 (or the PORT environment variable).
 
+## Docker Deployment (with vulnerabilities)
+
+### Build and Run with Docker
+
+```bash
+# Build Docker image
+npm run docker:build
+# or
+docker build -t vulnerable-nodejs-app:latest .
+
+# Run container
+npm run docker:run
+# or
+docker run -p 3000:3000 vulnerable-nodejs-app:latest
+```
+
+### Docker Compose (multi-service)
+
+```bash
+# Start all services (app, MongoDB, Redis)
+npm run docker:compose:up
+
+# View logs
+npm run docker:compose:logs
+
+# Stop services
+npm run docker:compose:down
+```
+
+### Docker Vulnerabilities for CodeRabbit Review
+
+#### Dockerfile Issues (`Dockerfile`)
+| Issue | Severity | Details |
+|-------|----------|---------|
+| **Running as root** | 🔴 CRITICAL | No USER directive specified |
+| **No health check** | 🔴 HIGH | Missing HEALTHCHECK instruction |
+| **Dev dependencies included** | 🔴 HIGH | npm install without --only=production |
+| **No signal handling** | 🟠 MEDIUM | No graceful shutdown on SIGTERM |
+| **Hardcoded port** | 🟠 MEDIUM | Port 3000 is static, not configurable |
+| **No multi-stage build** | 🟠 MEDIUM | Image size not optimized |
+| **Development mode default** | 🟠 MEDIUM | NODE_ENV not set |
+| **No image scanning** | 🟡 LOW | Base image vulnerabilities not checked |
+
+#### docker-compose.yml Issues
+| Issue | Severity | Details |
+|-------|----------|---------|
+| **Hardcoded credentials** | 🔴 CRITICAL | Admin passwords in plain text |
+| **Exposed database port** | 🔴 CRITICAL | MongoDB port 27017 bound to 0.0.0.0 |
+| **No restart policy** | 🔴 HIGH | Containers don't restart on failure |
+| **No resource limits** | 🔴 HIGH | Containers can consume unlimited resources |
+| **No health checks** | 🔴 HIGH | No automated health monitoring |
+| **Development config as template** | 🟠 MEDIUM | Not suitable for production |
+| **No volume persistence** | 🟠 MEDIUM | Data lost on container restart |
+| **No custom networks** | 🟠 MEDIUM | Services share default bridge network |
+| **Environment variables exposed** | 🟡 LOW | API keys visible in docker inspect |
+
+#### docker-build.sh Issues
+| Issue | Severity | Details |
+|-------|----------|---------|
+| **No error handling** | 🔴 CRITICAL | Script continues on failures |
+| **Hardcoded values** | 🔴 HIGH | Credentials embedded in script |
+| **No input validation** | 🔴 HIGH | User input not checked |
+| **Credentials in arguments** | 🔴 HIGH | API keys passed as env vars (visible) |
+| **No verification** | 🟠 MEDIUM | Container start not verified |
+| **Comments expose issues** | 🟡 LOW | Security vulnerabilities described in comments |
+
+#### Dockerfile.prod Issues
+| Issue | Severity | Details |
+|-------|----------|---------|
+| **Still running as root** | 🔴 CRITICAL | No USER directive in production build |
+| **No signal handling** | 🔴 HIGH | Container will be force-stopped |
+| **Large base image** | 🔴 HIGH | Should use distroless or alpine |
+| **No environment setup** | 🟠 MEDIUM | NODE_ENV not explicitly set |
+| **No build optimization** | 🟠 MEDIUM | Dependencies not filtered for production |
+
+#### .dockerignore Issues
+| Severity | Details |
+|----------|---------|
+| **Incomplete** | Many security-sensitive files not excluded |
+| **Exposes .env** | Credentials could be copied into image |
+| **Large image** | Test files and documentation included |
+
+### Docker Security Recommendations (for reference)
+
+Things that SHOULD be implemented (not in this PoC):
+```dockerfile
+# Use distroless base
+FROM node:22-distroless
+
+# Create non-root user
+USER nodejs
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD node healthcheck.js
+
+# Use .dockerignore properly
+# Handle signals for graceful shutdown
+# Use secrets for credentials (Docker Secrets or external management)
+# Multi-stage builds for optimization
+# Explicit NODE_ENV=production
+# Resource limits in compose or orchestration
+# Custom networks for service isolation
+# Restart policies for production
+```
+
 ## Using with CodeRabbit
 
 This application is designed to be reviewed by CodeRabbit to validate its code review capabilities. All the above issues should be identified and flagged by the code review tool.

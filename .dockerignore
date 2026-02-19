@@ -1,0 +1,33 @@
+# .dockerignore - Files to exclude from Docker builds
+
+# Issue: Incomplete ignore list
+# Missing security-sensitive files
+
+node_modules/
+npm-debug.log
+*.log
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.nyc_output/
+coverage/
+dist/
+build/
+.cache/
+temp/
+tmp/
+
+# Issue: These are NOT excluded (security vulnerability)
+# - .env files with hardcoded credentials are copied to container
+# - Sensitive configuration files included
+# - Test files included unnecessarily
+# - Documentation included (size increase)
